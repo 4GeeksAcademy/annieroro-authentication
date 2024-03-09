@@ -13,9 +13,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			isLogin: false,
+			user: {}
 		},
 		actions: {
+			login: (data) => {
+				setStore({isLogin: true});
+				setStore({user: data})
+			},
+			logout: () => {
+				setStore({isLogin: false});
+				localStorage.removeItem('token')
+				setStore({user: {}})
+			},
+			setMessage: (message) => {
+				setStore({message: message})
+
+			},
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");

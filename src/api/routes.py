@@ -22,12 +22,14 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
-@api.route('/signup', methods=['POST'])
-def handle_signup():
+@api.route("/sign-up", methods=["POST"])
+def signup():
     response_body = {}
     data = request.json
-    user = User(email=data['email'],
+    user = User(username=data['username'],
+                email=data['email'],
                 password=data['password'],
+                lastname=data['lastname'],
                 is_active=True)
     db.session.add(user)
     db.session.commit()
@@ -35,8 +37,6 @@ def handle_signup():
     return response_body, 200
 
 
-# Create a route to authenticate your users and return JWTs. The
-# create_access_token() function is used to actually generate the JWT.
 @api.route("/login", methods=["POST"])
 def login():
     response_body = {}
@@ -44,11 +44,14 @@ def login():
     password = request.json.get("password", None)
     user = db.session.execute(db.select(User).where(User.email == email)).scalar()
     if user and password == user.password:
-        access_token = create_access_token(identity=[email])
-        return jsonify(access_token=access_token)
-    else:
-        response_body['message'] = 'Usuario no logeado'
+        access_token = create_access_token(identity=user.serialize())
+        response_body['access_token'] = access_token
+        response_body['message'] = "User logged suscesfully!"
+        response_body['results'] = user.serialize()
         return response_body, 200
+    else:
+        response_body['message'] = "Error, incorrect email or password"
+    return response_body
 
 
 # Protect a route with jwt_required, which will kick out requests
@@ -67,8 +70,8 @@ def profile():
     response_body = {}
     # Access the identity of the current user with get_jwt_identity
     current_user = get_jwt_identity()
-    if current_user[1]['name'] == 'Annie':
-        response_body['message'] = "Este es el perfil de Annie"
-        return response_body, 200
+    print(current_user) 
+    response_body['message'] = "Este es el perfil de ?"
+    return response_body, 200
     response_body['message'] = "No tienes acceso a este perfil"
-    return response_body, 401
+    return response_body, 402
